@@ -1,13 +1,11 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
-public class Projectile {
-    private Texture texture;
-    private float x;
-    private float y;
+public class Projectile extends MyTexture{
+    private final BattleField battleField;
     private float vx;
     private float vy;
     private float speed;
@@ -21,9 +19,11 @@ public class Projectile {
         active = false;
     }
 
-    public Projectile() {
-        this.texture = new Texture("projectile.png");
+    public Projectile(BattleField battleField) {
+        super("projectile.png");
         this.speed = 600.0f;
+        this.battleField = battleField;
+        this.scale = 2f;
     }
 
     public void shoot(float x, float y, float angle) {
@@ -37,13 +37,23 @@ public class Projectile {
     public void update(float dt) {
         x += vx * dt;
         y += vy * dt;
-        if (x < 0 || x > 1280 || y < 0 || y > 720) {
+        if (x < 0 || x > battleField.getSizeX() || y < 0 || y > battleField.getSizeY()) {
+            deactivate();
+        }
+        if (battleField.getTarget().getCircle().contains(x,y)) {
+            battleField.getTarget().deactivate();
             deactivate();
         }
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(texture, x - 8, y - 8, 8, 8, 16, 16, 2, 2, 0, 0, 0, 16, 16, false, false);
+        batch.draw(texture, x - halfX, y - halfY, halfX, halfY, sizeX, sizeY, scale, scale,
+                0, 0, 0, sizeX, sizeY, false, false);
+    }
+
+    @Override
+    public void renderShape(ShapeRenderer shapeRenderer) {
+
     }
 
     public void dispose() {
